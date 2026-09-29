@@ -1,5 +1,6 @@
 import {
   Backpack,
+  Check,
   GraduationCap,
   Headphones,
   Keyboard,
@@ -35,7 +36,7 @@ function formatCount(count) {
   return `${(count / 1000).toFixed(1)}k`
 }
 
-function ProductCard({ product, onAdd }) {
+function ProductCard({ product, onAdd, match }) {
   const Icon = CATEGORY_ICONS[product.category] ?? Package
 
   return (
@@ -45,6 +46,13 @@ function ProductCard({ product, onAdd }) {
       </div>
 
       <div className="qc-card__body">
+        {match ? (
+          <p className="qc-match">
+            <span className="qc-match__score">{match.score}% Match</span>
+            <span className="qc-match__label">match score</span>
+          </p>
+        ) : null}
+
         <p className="qc-card__brand">{product.brand}</p>
         <h3 className="qc-card__title">{product.name}</h3>
         <p className="qc-card__rating">
@@ -52,6 +60,22 @@ function ProductCard({ product, onAdd }) {
           <span>{product.rating.toFixed(1)}</span>
           <span className="qc-card__reviews">({formatCount(product.reviewCount)})</span>
         </p>
+
+        {match ? (
+          <ul className="qc-reasons">
+            {match.reasons.map((reason) => (
+              <li key={reason} className="qc-reasons__item">
+                <Check size={12} aria-hidden="true" />
+                {reason}
+              </li>
+            ))}
+            {match.notes.map((note) => (
+              <li key={note} className="qc-reasons__item qc-reasons__item--note">
+                {note}
+              </li>
+            ))}
+          </ul>
+        ) : null}
       </div>
 
       <div className="qc-card__foot">

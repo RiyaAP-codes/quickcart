@@ -1,7 +1,7 @@
-import { ShoppingCart } from 'lucide-react'
+import { ShoppingCart, Sparkles } from 'lucide-react'
 import SearchBar from './SearchBar'
 
-function Navbar({ cartCount, query, onQueryChange }) {
+function Navbar({ cartCount, query, onQueryChange, onCartClick, onOpenAssistant }) {
   return (
     <header className="qc-navbar">
       <div className="qc-navbar__inner">
@@ -16,7 +16,22 @@ function Navbar({ cartCount, query, onQueryChange }) {
           <SearchBar value={query} onChange={onQueryChange} />
         </div>
 
-        <button type="button" className="qc-cart-btn" aria-label={`Cart with ${cartCount} items`}>
+        <button
+          type="button"
+          className="qc-assistant-btn"
+          onClick={onOpenAssistant}
+          aria-label="Open AI shopping assistant"
+        >
+          <Sparkles size={17} aria-hidden="true" />
+          <span className="qc-assistant-btn__label">AI Assistant</span>
+        </button>
+
+        <button
+          type="button"
+          className="qc-cart-btn"
+          onClick={onCartClick}
+          aria-label={`Cart with ${cartCount} items`}
+        >
           <ShoppingCart size={19} aria-hidden="true" />
           <span className="qc-cart-btn__label">Cart</span>
           <span className="qc-cart-btn__count">{cartCount}</span>
