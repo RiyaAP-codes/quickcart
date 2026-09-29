@@ -51,6 +51,7 @@ npm run preview  # serve the production build locally
 ```text
 quickcart/
 ├── .github/workflows/ci.yml   # install -> lint -> build
+├── JIRA_STORIES.md            # epic + US01-US10 with acceptance criteria
 ├── src/
 │   ├── components/
 │   │   ├── AIShoppingAssistant.jsx  # chat panel: intent + results
