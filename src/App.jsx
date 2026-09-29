@@ -1,5 +1,8 @@
 import { useMemo, useState } from 'react'
+import AIShoppingAssistant from './components/AIShoppingAssistant'
+import Cart from './components/Cart'
 import CategoryFilter from './components/CategoryFilter'
+import Checkout from './components/Checkout'
 import Navbar from './components/Navbar'
 import PriceFilter from './components/PriceFilter'
 import ProductList from './components/ProductList'
@@ -8,7 +11,8 @@ import './App.css'
 
 // Rounded up so the slider's step (1000) lands exactly on the ceiling and every
 // product is visible at the default position.
-const PRICE_CEILING = Math.ceil(Math.max(...PRODUCTS.map((product) => product.price)) / 1000) * 1000
+const PRICE_CEILING =
+  Math.ceil(Math.max(...PRODUCTS.map((product) => product.price)) / 1000) * 1000
 
 function matchesQuery(product, query) {
   const needle = query.trim().toLowerCase()
@@ -31,6 +35,9 @@ function App() {
   const [category, setCategory] = useState('all')
   const [maxPrice, setMaxPrice] = useState(PRICE_CEILING)
   const [cart, setCart] = useState([])
+  const [cartOpen, setCartOpen] = useState(false)
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [assistantOpen, setAssistantOpen] = useState(false)
 
   const visibleProducts = useMemo(
     () =>
@@ -43,7 +50,20 @@ function App() {
     [query, category, maxPrice],
   )
 
-  const cartCount = cart.reduce((total, item) => total + item.qty, 0)
+  // Resolves stored {id, qty} pairs back into real catalogue products.
+  const cartItems = useMemo(
+    () =>
+      cart
+        .map((item) => ({
+          product: PRODUCTS.find((product) => product.id === item.id),
+          qty: item.qty,
+        }))
+        .filter((item) => item.product !== undefined),
+    [cart],
+  )
+
+  const cartCount = cartItems.reduce((sum, item) => sum + item.qty, 0)
+  const cartTotal = cartItems.reduce((sum, item) => sum + item.product.price * item.qty, 0)
 
   function addToCart(product) {
     setCart((items) => {
@@ -59,9 +79,33 @@ function App() {
     })
   }
 
+  function increaseQty(id) {
+    setCart((items) =>
+      items.map((item) => (item.id === id ? { ...item, qty: item.qty + 1 } : item)),
+    )
+  }
+
+  function decreaseQty(id) {
+    setCart((items) =>
+      items
+        .map((item) => (item.id === id ? { ...item, qty: item.qty - 1 } : item))
+        .filter((item) => item.qty > 0),
+    )
+  }
+
+  function removeFromCart(id) {
+    setCart((items) => items.filter((item) => item.id !== id))
+  }
+
   return (
     <div className="qc-app" id="top">
-      <Navbar cartCount={cartCount} query={query} onQueryChange={setQuery} />
+      <Navbar
+        cartCount={cartCount}
+        query={query}
+        onQueryChange={setQuery}
+        onCartClick={() => setCartOpen(true)}
+        onOpenAssistant={() => setAssistantOpen((open) => !open)}
+      />
 
       <main className="qc-main">
         <section className="qc-toolbar">
@@ -95,6 +139,37 @@ function App() {
           processed.
         </p>
       </footer>
+
+      {cartOpen ? (
+        <Cart
+          items={cartItems}
+          total={cartTotal}
+          onIncrease={increaseQty}
+          onDecrease={decreaseQty}
+          onRemove={removeFromCart}
+          onCheckout={() => {
+            setCartOpen(false)
+            setCheckoutOpen(true)
+          }}
+          onClose={() => setCartOpen(false)}
+        />
+      ) : null}
+
+      {checkoutOpen ? (
+        <Checkout
+          items={cartItems}
+          total={cartTotal}
+          onPlaceOrder={() => setCart([])}
+          onClose={() => setCheckoutOpen(false)}
+        />
+      ) : null}
+
+      {assistantOpen ? (
+        <AIShoppingAssistant
+          onAddToCart={addToCart}
+          onClose={() => setAssistantOpen(false)}
+        />
+      ) : null}
     </div>
   )
 }
