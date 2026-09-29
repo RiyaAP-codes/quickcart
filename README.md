@@ -1,5 +1,9 @@
 # QuickCart — AI-Powered E-Commerce Platform
 
+[![CI](https://github.com/RiyaAP-codes/quickcart/actions/workflows/ci.yml/badge.svg)](https://github.com/RiyaAP-codes/quickcart/actions/workflows/ci.yml)
+
+Repository: https://github.com/RiyaAP-codes/quickcart
+
 A college DevOps/Agile mini-project: a React storefront with a natural-language
 shopping assistant that turns a plain-English request into structured
 requirements, filters a real product catalogue, and explains every
