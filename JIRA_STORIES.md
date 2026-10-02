@@ -79,7 +79,7 @@ see products I can actually consider.**
 ---
 
 ## US04 — Shopping cart
-
+https://riyaashokp131178.atlassian.net/browse/SCRUM-15
 **As a customer, I want to add products to a cart and adjust quantities so that
 I can buy more than one of an item before paying.**
 
