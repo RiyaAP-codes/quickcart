@@ -1,6 +1,8 @@
 # QuickCart — AI-Powered E-Commerce Platform
 
-[![CI](https://github.com/RiyaAP-codes/quickcart/actions/workflows/ci.yml/badge.svg)](https://github.com/RiyaAP-codes/quickcart/actions/workflows/ci.yml)
+[![CI](https://github.com/RiyaAP-codes/quickcart/actions/workflows/ci.yml/badge.svg)](https://github.com/RiyaAP-codes/quickcart/actions/workflows/ci.yml) [![Deploy](https://github.com/RiyaAP-codes/quickcart/actions/workflows/deploy.yml/badge.svg)](https://github.com/RiyaAP-codes/quickcart/actions/workflows/deploy.yml)
+
+**Live demo:** https://riyaap-codes.github.io/quickcart/
 
 Repository: https://github.com/RiyaAP-codes/quickcart
 
@@ -31,7 +33,7 @@ result is a row that already exists in `src/data/products.js`.
 - React 19 + Vite 8 (JavaScript, no TypeScript)
 - `lucide-react` for icons
 - ESLint 9 flat config with the React Hooks plugin
-- GitHub Actions for CI
+- GitHub Actions for CI, and GitHub Pages for hosting
 
 No backend, no database, no authentication, no payment gateway.
 
@@ -54,7 +56,8 @@ npm run preview  # serve the production build locally
 
 ```text
 quickcart/
-├── .github/workflows/ci.yml   # install -> lint -> build
+├── .github/workflows/ci.yml     # install -> lint -> build
+├── .github/workflows/deploy.yml  # install -> lint -> build -> publish to Pages
 ├── JIRA_STORIES.md            # epic + US01-US10 with acceptance criteria
 ├── src/
 │   ├── components/
@@ -76,6 +79,8 @@ quickcart/
 │   ├── App.css
 │   ├── index.css              # design tokens + reset
 │   └── main.jsx
+├── eslint.config.js       # flat config; Node globals for *.config.js
+├── vite.config.js         # base: /quickcart/ in CI, / locally
 ├── index.html
 └── package.json
 ```
@@ -141,11 +146,43 @@ budget means no results, not a low-scoring substitute.
 
 ## CI/CD
 
-`.github/workflows/ci.yml` runs on every push and pull request to `main`:
+Two workflows run on every push to `main`.
+
+`ci.yml` — install, lint, build:
 
 ```text
 push -> checkout -> setup Node 20 -> npm ci -> npm run lint -> npm run build
 ```
 
-The job passes only when the app installs, lints and builds cleanly. The build
-output in `dist/` is a static bundle, so it can be deployed to any static host.
+`deploy.yml` — the same gate, then publish:
+
+```text
+push -> ... -> npm run build -> upload dist/ artifact -> deploy to GitHub Pages
+```
+
+Both fail the build on any lint or build error, so nothing broken reaches the live
+site. Concurrency is set to cancel in-flight deploys, so only the newest commit is
+ever published.
+
+### Why `vite.config.js` reads `process.env.GITHUB_ACTIONS`
+
+GitHub Pages serves this project from the `/quickcart/` sub-path, not the domain
+root, so the published bundle needs `base: '/quickcart/'`. Local dev and
+`npm run preview` serve from the root and need `base: '/'`. A single hardcoded
+value would break one of the two, so the base is chosen from the environment:
+
+```js
+base: process.env.GITHUB_ACTIONS ? '/quickcart/' : '/'
+```
+
+Verified: a local build emits `/assets/index-<hash>.js`, a CI build emits
+`/quickcart/assets/index-<hash>.js`, and the live site serves the latter.
+
+### Hosting
+
+Hosted on GitHub Pages at https://riyaap-codes.github.io/quickcart/. The
+repository is public because GitHub Pages on the free plan only serves public
+repositories.
+
+To deploy a change, push to `main` and watch the Deploy workflow. No local
+`npm run build` is needed.
